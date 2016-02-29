@@ -11,12 +11,13 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = MoviesController.movie_ratings
     if params[:sort_by] == "title_header"
       @movies = Movie.all.order(:title)
-      @t_hilite = true
+      @t_hilite = true  # title highlight 
     elsif params[:sort_by] == "release_date_header"
       @movies = Movie.all.order(:release_date)
-      @r_hilite = true
+      @r_hilite = true #release date highlight
     else
       @movies = Movie.all
     end
@@ -48,6 +49,16 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+
+
+  def self.movie_ratings
+    movies = Movie.all
+    ratings = SortedSet.new # unique ratings
+    movies.each do |movie| # extract the rating
+      ratings.add?(movie.rating)
+    end
+    return ratings
   end
 
 end
