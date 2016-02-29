@@ -3,7 +3,28 @@ class MoviesController < ApplicationController
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
-
+  
+  def self.movie_ratings
+    movies = Movie.all
+    ratings = SortedSet.new # unique ratings
+    movies.each do |movie| # extract the rating
+    ratings.add?(movie.rating)
+    end
+    return ratings
+  end
+=begin
+  def movie_order
+    if params[:sort_by] == "title_header"
+      @t_hilite = true
+      return :title
+    elsif params[:sort_by] == "release_date_header"
+      @r_hilite = true
+      return :release_date
+    else
+      return :id # default order of movies
+    end
+  end
+=end
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -11,7 +32,7 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @all_ratings = MoviesController.movie_ratings
+    @all_ratings = MoviesController.movie_ratings # available movie ratings
     if params[:sort_by] == "title_header"
       @movies = Movie.all.order(:title)
       @t_hilite = true  # title highlight 
@@ -49,16 +70,6 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
-  end
-
-
-  def self.movie_ratings
-    movies = Movie.all
-    ratings = SortedSet.new # unique ratings
-    movies.each do |movie| # extract the rating
-      ratings.add?(movie.rating)
-    end
-    return ratings
   end
 
 end
