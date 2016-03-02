@@ -14,11 +14,14 @@ class MoviesController < ApplicationController
   def movie_order
     if params[:sort_by] == "title_header"
       @t_hilite = true
+      session[:sort_by] = "title_header"
       return :title
     elsif params[:sort_by] == "release_date_header"
       @r_hilite = true
+      session[:sort_by] = "release_date_header" 
       return :release_date
     else
+      #@session[:sort_by] = "id" if session.has_key?(:sort_by)
       return :id # default order of movies
     end
   end
@@ -31,12 +34,14 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = MoviesController.movie_ratings # available movie ratings
+    
     if !params.has_key?(:ratings) || params[:ratings].size == @all_ratings.size
       @checked_boxes = @all_ratings 
       @movies = Movie.all.order(movie_order) # all movies are query
     else
       @checked_boxes = params[:ratings].keys
-      @movies = Movie.all.where(rating: @checked_boxes)
+      @movies = Movie.all.where(rating: @checked_boxes).order(movie_order)
+    
     end
   end
 
@@ -47,7 +52,7 @@ class MoviesController < ApplicationController
   def create
     @movie = Movie.create!(movie_params)
     flash[:notice] = "#{@movie.title} was successfully created."
-    redirect_to movies_path
+    redirect_to movies_path(:sort_by => session[:sort_by])
   end
 
   def edit
@@ -65,7 +70,7 @@ class MoviesController < ApplicationController
     @movie = Movie.find(params[:id])
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
-    redirect_to movies_path
+    redirect_to movies_path(:sort_by => session[:sort_by])
   end
 
 end

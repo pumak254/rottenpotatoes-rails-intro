@@ -10,5 +10,7 @@
 
   = label :movie, :release_date, 'Released On'
   = date_select :movie, :release_date
+  
+  = hidden_field_tag :sort_by, session[:sort_by]
 
   = submit_tag 'Save Changes'
