@@ -21,11 +21,25 @@ class MoviesController < ApplicationController
       session[:sort_by] = "release_date_header" 
       return :release_date
     else
-      #@session[:sort_by] = "id" if session.has_key?(:sort_by)
       return :id # default order of movies
     end
   end
 
+  # modifies @checked_boxes to appropiate setting
+  def movie_filter
+    if params.has_key?(:ratings) # at least one has been chosen from params
+      @checked_boxes = params[:ratings].keys
+      session[:ratings] = params[:ratings] # save settings
+    else
+      if session.has_key?(:ratings) # no params, but session exists
+        @checked_boxes = session[:ratings].keys
+      else # for very first time in index page
+        @checked_boxes = @all_ratings 
+        session[:ratings] = @all_ratings # check all boxes 1st visit
+      end
+    end
+  end
+#=end
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -33,17 +47,11 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @all_ratings = MoviesController.movie_ratings # available movie ratings
-    
-    if !params.has_key?(:ratings) || params[:ratings].size == @all_ratings.size
-      @checked_boxes = @all_ratings 
-      @movies = Movie.all.order(movie_order) # all movies are query
-    else
-      @checked_boxes = params[:ratings].keys
-      @movies = Movie.all.where(rating: @checked_boxes).order(movie_order)
-    
-    end
+    @all_ratings = MoviesController.movie_ratings
+    movie_filter # call to modify @checked_boxes accordingly
+    @movies = Movie.all.where(rating: @checked_boxes).order(movie_order)
   end
+
 
   def new
     # default: render 'new' template

@@ -15,10 +15,10 @@
   %thead
     %tr
       %th{@t_hilite ? {class:"hilite"} : {}}=link_to 'Movie Title', 
-        movies_path(:sort_by => :title_header)
+        movies_path(:sort_by => :title_header, :ratings => session[:ratings])
       %th Rating
       %th{@r_hilite ? {class:"hilite"} : {}}=link_to 'Release Date', 
-        movies_path(:sort_by => :release_date_header)
+        movies_path(:sort_by => :release_date_header, :ratings => session[:ratings], 4 => 3)
       %th More Info
   %tbody
     - @movies.each do |movie|
